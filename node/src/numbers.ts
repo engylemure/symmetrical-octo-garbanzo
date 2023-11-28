@@ -21,6 +21,23 @@ router.get('/numbers', async function (req, res, next) {
 });
 
 
+const StatsNumbersQueryParams = z.object({
+  isPrime: z.coerce.boolean().optional(),
+  min: z.coerce.number().optional(),
+  max: z.coerce.number().optional()
+})
+
+router.get('/numbers/stats', async function (req, res, next) {
+  const { min, max, isPrime } = StatsNumbersQueryParams.parse(req.query);
+  const em = RequestContext.getEntityManager();
+  if (em) {
+    res.json(numbersStatistics(await em.find(NumberEntity, { isPrime, ...((min || max) && { value: { ...(min && { $gte: min }), ...(max && { $lte: max }) } }) })))
+  } else {
+    res.status(500).send()
+  }
+})
+
+
 const PostNumbersPayload = z.object({
   value: z.coerce.number()
 })
@@ -69,6 +86,22 @@ function sieveOfEratosthenes(num: number) {
     p += 1;
   }
   return primes;
+}
+
+
+function numbersStatistics(numbers: NumberEntity[]) {
+  const length = numbers.length;
+  const isLengthPair = length % 2 === 0;
+  const median = isLengthPair && length != 0 ? (numbers[length / 2]?.value + numbers[length / 2 + 1]?.value) / 2 : numbers[Math.floor(length / 2)]?.value;
+  const avg = numbers.reduce((acc, nEntity) => nEntity.value + acc, 0) / length;
+  const standardDeviation = Math.sqrt(numbers.reduce((acc, nEntity) => Math.pow(nEntity.value - avg, 2) + acc, 0) / length)
+  return {
+    first: numbers[0]?.value,
+    last: numbers[numbers.length - 1]?.value,
+    avg,
+    median,
+    standardDeviation
+  }
 }
 
 export default router;
