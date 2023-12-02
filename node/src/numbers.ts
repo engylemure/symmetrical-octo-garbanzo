@@ -10,7 +10,7 @@ const GetNumbersQueryParams = z.object({
 
 const router = express.Router();
 
-router.get('/numbers', async function (req, res, next) {
+router.get('/', async function (req, res, next) {
   const query = GetNumbersQueryParams.parse(req.query);
   const em = RequestContext.getEntityManager();
   if (em) {
@@ -27,7 +27,7 @@ const StatsNumbersQueryParams = z.object({
   max: z.coerce.number().optional()
 })
 
-router.get('/numbers/stats', async function (req, res, next) {
+router.get('/stats', async function (req, res, next) {
   const { min, max, isPrime } = StatsNumbersQueryParams.parse(req.query);
   const em = RequestContext.getEntityManager();
   if (em) {
@@ -42,7 +42,7 @@ const PostNumbersPayload = z.object({
   value: z.coerce.number()
 })
 
-router.post('/numbers', async function (req, res, next) {
+router.post('/', async function (req, res, next) {
   const payload = PostNumbersPayload.safeParse(req.body);
 
   if (payload.success) {

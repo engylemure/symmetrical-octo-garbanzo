@@ -32,7 +32,7 @@ async function init() {
   app.get('/', (_, res) => {
     res.send('Hello World!')
   });
-  app.use(numbers);
+  app.use('/numbers', numbers);
 
   const port = process.env.PORT || '8080';
 
