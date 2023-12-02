@@ -1,0 +1,12 @@
+GET http://localhost:8080/numbers  HTTP/1.1
+content-type: application/json
+
+
+###
+
+POST http://localhost:8080/numbers HTTP/1.1
+content-type: application/json
+
+{
+    "value": 1000000
+}
