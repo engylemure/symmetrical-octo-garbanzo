@@ -5,16 +5,17 @@ import { z } from 'zod';
 import { EntityManager } from '@mikro-orm/postgresql';
 
 const GetNumbersQueryParams = z.object({
-  isPrime: z.coerce.boolean().optional()
+  isPrime: z.coerce.boolean().optional(),
+  limit: z.coerce.number().optional()
 });
 
 const router = express.Router();
 
 router.get('/', async function (req, res, next) {
-  const query = GetNumbersQueryParams.parse(req.query);
+  const { limit, ...query } = GetNumbersQueryParams.parse(req.query);
   const em = RequestContext.getEntityManager();
   if (em) {
-    res.json(await em.find(NumberEntity, query))
+    res.json(await em.find(NumberEntity, query, { limit }))
   } else {
     res.status(500).send()
   }

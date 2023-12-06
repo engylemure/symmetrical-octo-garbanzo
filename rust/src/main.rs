@@ -39,6 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .app_data(db_conn.clone())
             .wrap(TracingLogger::default())
             .configure(api::number::config)
+            .service(actix_files::Files::new("/static", ".").show_files_listing())
     })
     .bind(socket_addr)?;
 

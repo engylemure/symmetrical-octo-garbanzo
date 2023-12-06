@@ -11,32 +11,34 @@ class NumbersSimulation extends Simulation {
   val random = new Random
    val httpProtocol = http
     .baseUrl("http://localhost")
-  val data = List(1, 2, 3, 4, 5).map(value => Map("value" -> value))
-  def sim(scenarioName: String, port: String): ScenarioBuilder = {
+  val data = List(1, 2, 3, 4, 5).map(value => Map("value" -> pow(10, value)))
+  def viewSim(scenarioName: String, port: String): ScenarioBuilder = {
     return scenario(scenarioName)
       .feed(Iterator.continually(data).flatten)
       .exec(
-        http("create_numbers")
-          .post(s":$port/numbers")
-          .body(StringBody("{\"value\":\"#{value}\"}"))
-          .header("content-type", "application/json")
-      )
-      .exec(
         http("view_numbers")
-          .get(s":$port/numbers")
+          .get(s":$port/numbers?limit=#{value}")
           .header("content-type", "application/json")
       )
   }
-  val nodeSim = sim("NodeSimulation", "8082")
-  val rustSim = sim("RustSimulation", "8082")
-
+  val nodeSim = viewSim("NodeSimulation", "8082")
+  val rustSim = viewSim("RustSimulation", "8082")
+  val createNumbers = scenario("Populating Database")
+    .exec(
+        http("create_numbers")
+          .post(":8082/numbers")
+          .body(StringBody("{\"value\":\"1000000\"}"))
+          .header("content-type", "application/json")
+      )
   setUp(
-    rustSim.inject(
-      constantConcurrentUsers(20).during(1.minutes)
-    ).andThen(
-      nodeSim.inject(
-        constantConcurrentUsers(20).during(1.minutes)
-      ) 
+    createNumbers.inject(atOnceUsers(1)).andThen(
+      rustSim.inject(
+        constantConcurrentUsers(20).during(30.seconds)
+      ).andThen(
+        nodeSim.inject(
+          constantConcurrentUsers(20).during(30.seconds)
+        ) 
+      )
     )
   ).protocols(httpProtocol)
 }

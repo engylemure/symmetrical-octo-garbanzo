@@ -1,7 +1,7 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use sea_orm::{
     ActiveValue, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, QueryTrait,
-    TransactionTrait,
+    TransactionTrait, QuerySelect,
 };
 use serde::Deserialize;
 
@@ -20,6 +20,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
 #[serde(rename_all = "camelCase")]
 struct GetNumbersQueryParams {
     is_prime: Option<bool>,
+    limit: Option<u64>,
 }
 
 #[get("")]
@@ -32,6 +33,7 @@ async fn index(
         .apply_if(params.is_prime, |query, is_prime| {
             query.filter(NumberEntityColumn::IsPrime.eq(is_prime))
         })
+        .limit(params.limit)
         .all(db_conn)
         .await
     {
