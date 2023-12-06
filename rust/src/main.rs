@@ -37,9 +37,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server = HttpServer::new(move || {
         App::new()
             .app_data(db_conn.clone())
+            .wrap(actix_cors::Cors::permissive())
             .wrap(TracingLogger::default())
             .configure(api::number::config)
-            .service(actix_files::Files::new("/static", ".").show_files_listing())
+            .service(actix_files::Files::new("/static", "./static").show_files_listing())
     })
     .bind(socket_addr)?;
 
