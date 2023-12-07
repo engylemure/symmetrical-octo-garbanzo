@@ -1,6 +1,6 @@
 #!/bin/bash
 
 if [ "$RUST_ENV" == "dev" ]
-then cargo run
-else cargo run --release
+then cargo watch -x run --release
+else ./target/release/rust-server
 fi

@@ -11,7 +11,7 @@ use actix_web::{App, HttpServer};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    dotenv()?;
+    dotenv().ok();
     tracing_subscriber::registry()
         .with(
             fmt::layer().with_span_events(fmt::format::FmtSpan::NEW | fmt::format::FmtSpan::CLOSE),

@@ -1,6 +1,7 @@
 FROM node:18.17-alpine3.18 
 
 ENV HOME=/opt/app
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 
 WORKDIR $HOME
 

@@ -11,18 +11,18 @@ class NumbersSimulation extends Simulation {
   val random = new Random
    val httpProtocol = http
     .baseUrl("http://localhost")
-  val data = List(1, 2, 3, 4, 5).map(value => Map("value" -> pow(10, value)))
+  val data = List(1, 2, 3, 4, 5).map(value => Map("value" -> pow(10, value).toInt))
   def viewSim(scenarioName: String, port: String): ScenarioBuilder = {
     return scenario(scenarioName)
       .feed(Iterator.continually(data).flatten)
       .exec(
-        http("view_numbers")
+        http(s"$scenarioName view_numbers")
           .get(s":$port/numbers?limit=#{value}")
           .header("content-type", "application/json")
       )
   }
   val nodeSim = viewSim("NodeSimulation", "8082")
-  val rustSim = viewSim("RustSimulation", "8082")
+  val rustSim = viewSim("RustSimulation", "8081")
   val createNumbers = scenario("Populating Database")
     .exec(
         http("create_numbers")
